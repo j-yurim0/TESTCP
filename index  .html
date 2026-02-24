@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 컷팅 플랜 (Smart CP) - Ver 12.9 (Final Sync & Speed Fix)</title>
+    <title>스마트 컷팅 플랜 (Smart CP) - Ver 13.0 (Cache Wipe & Sheet1 Fix)</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -53,21 +53,28 @@
 <body class="bg-gray-50 text-gray-900">
     <div id="root"></div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        window.FirebaseSDK = { initializeApp, getAuth, signInAnonymously };
+        window.dispatchEvent(new Event('firebase-sdk-ready'));
+    </script>
+
     <script type="text/babel">
         const { useState, useEffect, useRef, memo, useCallback, useMemo } = React;
 
         // ==========================================
         // 🚨 [설정] 구글 스프레드시트 초기 설정
         const DEFAULT_CONFIG = {
-            apiKey: 'AIzaSyBoOVQF_WEEiIZqFIA89ET2Rvt95CUjzWk', // 요청하신 API 키 강제 지정
+            apiKey: 'AIzaSyBoOVQF_WEEiIZqFIA89ET2Rvt95CUjzWk', 
             clientId: '791608320864-ro52gqaonn7ppkoib6due2m48sfv9969.apps.googleusercontent.com',
             spreadsheetId: '1I0-XY4ZjhbjCBHEbZ36B8QSKb99CQk2aBHgBpBMGLWc',
-            sheetName: 'Sheet1' // 요청하신 Sheet1 강제 지정
+            sheetName: 'Sheet1' // 🌟 탭 이름 무조건 Sheet1 고정
         };
 
         const getSavedConfig = () => {
-            // 🚨 v6로 버전을 올려서 브라우저에 저장된 예전 기억('시트1'이나 빈 API 키 등)을 강제로 리셋시킵니다.
-            const saved = localStorage.getItem('smart_cp_google_config_v6');
+            // 🚨 v13으로 로컬스토리지 키를 완전히 바꿔서 과거의 '시트1' 찌꺼기 기억을 완벽하게 소각합니다.
+            const saved = localStorage.getItem('smart_cp_google_config_v13');
             if (saved) {
                 try { return JSON.parse(saved); } catch(e) {}
             }
@@ -202,7 +209,7 @@
                                 <input type="text" className="w-full p-2 border rounded text-xs bg-gray-50 focus:bg-white" value={localConfig.spreadsheetId} onChange={e => setLocalConfig({...localConfig, spreadsheetId: e.target.value})} />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">시트(탭) 이름 (예: Sheet1)</label>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">시트(탭) 이름 (현재: {localConfig.sheetName})</label>
                                 <input type="text" className="w-full p-2 border rounded text-xs bg-gray-50 focus:bg-white" value={localConfig.sheetName} onChange={e => setLocalConfig({...localConfig, sheetName: e.target.value})} />
                             </div>
                         </div>
@@ -378,7 +385,7 @@
                 <div id="sidebar" className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col fixed left-0 top-0 z-30 print:hidden shadow-sm">
                     <div className="p-6 border-b">
                         <h1 className="text-xl font-bold flex items-center gap-2 text-blue-700"><Calculator /> Smart CP</h1>
-                        <p className="text-xs text-gray-400 mt-1">Ver 12.9 (Sync Fix)</p>
+                        <p className="text-xs text-gray-400 mt-1">Ver 13.0 (Sheet1 Fix)</p>
                     </div>
                     <div className="p-4 space-y-4 flex-1 overflow-y-auto">
                         <div className="space-y-2">
@@ -704,7 +711,7 @@
                                 <h3 className="font-bold text-gray-700 mb-2 flex items-center gap-2 text-sm"><Cloud size={16} /> 구글 시트 재고 연동</h3>
                                 {isGapiReady ? (!isLoggedIn ? (<button onClick={handleLogin} className="w-full bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-200 transition mb-2">구글 로그인 (재고 연동)</button>) : (<div className="space-y-2"><div className="text-xs text-green-600 font-bold mb-1">✓ 구글 계정 연동됨</div><button onClick={handleFetchStock} className="w-full bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow hover:bg-green-700 transition mb-1">📥 재고 불러오기 (사용)</button></div>)) : (
                                     <div className="text-xs text-red-500 font-bold bg-red-50 p-2 rounded border border-red-200 cursor-pointer hover:bg-red-100" onClick={() => setIsConfigModalOpen(true)}>
-                                        ⚠️ 설정 오류. 클릭하여 API 키를 입력하세요.
+                                        ⚠️ 설정 오류. 클릭하여 API 키를 확인하세요.
                                     </div>
                                 )}
                             </div>
@@ -848,7 +855,7 @@
             const [googleConfig, setGoogleConfig] = useState(getSavedConfig());
 
             const handleSaveConfig = (newConfig) => {
-                localStorage.setItem('smart_cp_google_config_v6', JSON.stringify(newConfig));
+                localStorage.setItem('smart_cp_google_config_v13', JSON.stringify(newConfig));
                 window.location.reload();
             };
 
@@ -903,7 +910,6 @@
             useEffect(() => {
                 const initGapi = () => { 
                     if (!googleConfig.apiKey) return;
-                    
                     gapi.load('client', async () => { 
                         try {
                             await gapi.client.init({ apiKey: googleConfig.apiKey, discoveryDocs: [DISCOVERY_DOC] }); 
@@ -921,7 +927,7 @@
                                 } catch (e) { } 
                             }
                         } catch (error) {
-                            console.warn("GAPI Init Error (Background): API Key might be restricted or invalid.", error);
+                            console.warn("GAPI Init Error (Background): API Key might be restricted or invalid.");
                         }
                     }); 
                 };
@@ -1002,7 +1008,7 @@
                         if (isReferrerBlocked) {
                             setApiError(`🚨 API 키 보안 제한 오류 (403)\n\n현재 설정된 API 키가 차단되었습니다.\n\n구글 클라우드 콘솔 설정 [웹사이트 제한] 항목에 아래 주소를 꼭 추가해 주세요:\n\n${window.location.origin}/*\n\n(참고: 추가 후 약 5분 정도 기다린 뒤 이 화면을 새로고침 하시면 됩니다.)`);
                         } else if (err.code === 400) {
-                            alert(`🚨 시트 이름을 찾을 수 없습니다 (400 에러)\n현재 설정된 시트 이름: '${googleConfig.sheetName}'\n실제 스프레드시트 하단의 탭 이름과 일치하는지 [구글 연동 설정] 메뉴에서 확인해주세요.`);
+                            alert(`🚨 시트 이름을 찾을 수 없습니다 (400 에러)\n\n현재 설정된 시트 이름: '${googleConfig.sheetName}'\n\n실제 구글 스프레드시트 화면 맨 아래에 있는 탭 이름(예: Sheet1)과 정확히 똑같은지 좌측 하단의 ⚙️ [구글 연동 설정]에서 다시 한 번 확인해 주세요.`);
                             setIsConfigModalOpen(true);
                         } else if (err.code === 403) {
                             alert(`🚨 권한이 없습니다 (403 에러)\n현재 로그인한 구글 계정이 스프레드시트 편집 권한을 가지고 있는지 확인해주세요.`);
@@ -1547,6 +1553,7 @@
 
             return (
                 <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col relative">
+                    {/* 🚨 API 에러 배너 (alert 대신 화면에 고정 표시) */}
                     {apiError && (
                         <div className="fixed top-0 left-64 right-0 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 shadow-md flex justify-between items-start">
                             <div>
@@ -1567,7 +1574,7 @@
                     <div className="flex flex-1">
                         <Sidebar viewMode={viewMode} setViewMode={setViewMode} projectInfo={projectInfo} setProjectInfo={setProjectInfo} isNoDongMode={isNoDongMode} setIsNoDongMode={setIsNoDongMode} setIsConfigModalOpen={setIsConfigModalOpen} />
                         <div className="flex-1 ml-64 p-8 print:m-0 print:p-0 relative">
-                            {viewMode === 'input' && (<InputView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} data={getCurrentData()} updateCurrentData={updateCurrentData} activeTab={activeTab} setActiveTab={setActiveTab} customStocks={customStocks} setCustomStocks={setCustomStocks} processGridData={processGridData} handlePaste={handlePaste} runAllDongs={runAllDongs} globalSettings={STANDARD_STOCKS} isUserStockMode={isUserStockMode} setIsUserStockMode={setIsUserStockMode} userStockList={userStockList} setUserStockList={setUserStockList} setViewMode={setViewMode} isCalculating={isCalculating} isNoDongMode={isNoDongMode} handleFetchStock={handleFetchStock} isGapiReady={isGapiReady} isLoggedIn={isLoggedIn} handleLogin={handleLogin} inputMode={inputMode} setInputMode={setInputMode} />)}
+                            {viewMode === 'input' && (<InputView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} data={getCurrentData()} updateCurrentData={updateCurrentData} activeTab={activeTab} setActiveTab={setActiveTab} customStocks={customStocks} setCustomStocks={setCustomStocks} processGridData={processGridData} handlePaste={handlePaste} runAllDongs={runAllDongs} globalSettings={STANDARD_STOCKS} isUserStockMode={isUserStockMode} setIsUserStockMode={setIsUserStockMode} userStockList={userStockList} setUserStockList={setUserStockList} setViewMode={setViewMode} isCalculating={isCalculating} isNoDongMode={isNoDongMode} handleFetchStock={handleFetchStock} isGapiReady={isGapiReady} isLoggedIn={isLoggedIn} handleLogin={handleLogin} inputMode={inputMode} setInputMode={setInputMode} setIsConfigModalOpen={setIsConfigModalOpen} />)}
                             {viewMode === 'result' && (<ResultView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} resultsByDong={resultsByDong} runAllDongs={runAllDongs} openExcelModal={() => setIsExcelModalOpen(true)} openStockModal={() => setIsStockModalOpen(true)} setViewMode={setViewMode} setManualData={setManualData} projectInfo={projectInfo} isNoDongMode={isNoDongMode} openCopyModal={() => setIsCopyModalOpen(true)} />)}
                             {viewMode === 'manual' && (<ManualCPView dongs={dongs} currentDong={currentDong} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} projectInfo={projectInfo} manualData={manualData} setManualData={setManualData} onConvert={handleManualToResult} parsedItems={getCurrentData().parsedItems.length > 0 ? getCurrentData().parsedItems : parseItemsFromGrid(getCurrentData().gridData, getCurrentData().colMapping, getCurrentData().spec, getCurrentData().thickness)} isNoDongMode={isNoDongMode} openCopyModal={() => setIsCopyModalOpen(true)} />)}
                         </div>
