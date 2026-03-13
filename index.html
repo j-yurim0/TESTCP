@@ -15,7 +15,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 
-    <!-- 💡 소스 코드 압축을 위한 LZ-String 라이브러리 추가 -->
+    <!-- LZ-String 압축 라이브러리 추가 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 
     <style>
@@ -100,7 +100,7 @@
         const API_KEY = 'AIzaSyBoOVQF_WEEiIZqFIA89ET2Rvt95CUjzWk';
         const SPREADSHEET_ID = '1I0-XY4ZjhbjCBHEbZ36B8QSKb99CQk2aBHgBpBMGLWc';
         const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'; // 읽기 전용으로 권한 축소
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'; // 읽기 전용
 
         const SHEET_ROW_MAP = [
             { row: 5, w: 50, h: 50, t: '2.1', l: 6000 },
@@ -111,6 +111,12 @@
             { row: 29, w: 100, h: 100, t: '3.0', l: 5000 }, { row: 30, w: 100, h: 100, t: '3.0', l: 6000 }, { row: 31, w: 100, h: 100, t: '3.0', l: 7200 }, { row: 32, w: 100, h: 100, t: '3.0', l: 8000 },
             { row: 34, w: 100, h: 100, t: '3.2', l: 6000 }, { row: 35, w: 100, h: 100, t: '3.2', l: 6200 }, { row: 36, w: 100, h: 100, t: '3.2', l: 7200 }, { row: 37, w: 100, h: 100, t: '3.2', l: 8000 }
         ];
+
+        const getUnitWeight = (w, h, t) => {
+            const dims = [parseInt(w), parseInt(h)].sort((a, b) => b - a);
+            const key = `${dims[0]}-${dims[1]}-${t}`;
+            return UNIT_WEIGHT_DATA[key] || 0;
+        };
 
         // --- Helper Function: Parse Items from Grid ---
         const parseItemsFromGrid = (gridData, colMapping, defaultSpec, defaultThickness) => {
@@ -299,26 +305,22 @@
                     return;
                 }
                 const exportData = {
-                    version: '2.0', // 버전을 2.0 (압축버전)으로 명시
+                    version: '2.0', 
                     timestamp: Date.now(),
                     projectInfo,
                     dongs,
                     resultsByDong,
-                    dongData // App 2에서 수동 편집 및 재계산을 위해 견적서 원본 데이터 포함
+                    dongData 
                 };
                 
                 try {
                     const jsonStr = JSON.stringify(exportData);
-                    
-                    // LZString을 이용한 데이터 압축 (Base64 형식)
-                    // 기존 일반 텍스트 인코딩 대비 용량을 70~80% 가까이 줄여줍니다.
                     const compressedData = LZString.compressToBase64(jsonStr);
                     const finalCode = `SMARTCP-v2-${compressedData}`;
                     
                     navigator.clipboard.writeText(finalCode).then(() => {
                         alert("✅ 고효율 압축된 소스 코드가 클립보드에 복사되었습니다!\nApp 2 (에디터/생산용)에 붙여넣어 주세요.");
                     }).catch(err => {
-                        // Fallback for clipboard
                         const textArea = document.createElement("textarea");
                         textArea.value = finalCode;
                         document.body.appendChild(textArea);
@@ -355,12 +357,31 @@
                                     const totalBarsDisplay = summary.totalBars || plan.reduce((acc, p) => acc + Number(p.qty || 0), 0);
                                     const totalLossValue = summary.totalLoss !== undefined ? summary.totalLoss : plan.reduce((acc, p) => acc + (Number(p.remainder || 0) * Number(p.qty || 0)), 0);
                                     const displayLoss = Number(totalLossValue).toLocaleString();
+
+                                    // 중량 계산 (App1 플래너 결과창 반영)
+                                    const unitWeight = getUnitWeight(w, h, t);
+                                    let totalStockLen = 0;
+                                    plan.forEach(group => { totalStockLen += (group.stockLength * group.qty); });
+                                    const inputWeight = (totalStockLen / 1000) * unitWeight;
+                                    const lossWeight = (totalLossValue / 1000) * unitWeight;
+                                    const prodWeight = inputWeight - lossWeight;
+
                                     return (
                                         <div key={specKey || idx} className="break-before-page">
                                             <div className="flex items-center gap-3 mb-3 pb-2 border-b border-gray-100 print:border-none">
                                                 <span className={`font-bold px-3 py-1 rounded text-sm print:hidden ${resultTab === 'min_rows' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>#{idx + 1} {resultTab === 'min_rows' ? '작업편의' : 'LOSS최소'}</span>
                                                 <h3 className="font-bold text-xl text-gray-800">{specKey}</h3>
-                                                <div className="text-xs text-gray-500 ml-auto flex gap-4 print:text-black"><span>총 원본: <b>{totalBarsDisplay}본</b></span><span>총 잔재: <b>{displayLoss}mm</b></span><span>잔재율: {summary.lossRate}%</span></div>
+                                                <div className="text-xs text-gray-500 ml-auto flex flex-col items-end gap-1 print:text-black">
+                                                    <div className="flex gap-4">
+                                                        <span>총 원본: <b>{totalBarsDisplay}본</b></span><span>총 잔재: <b>{displayLoss}mm</b></span><span>잔재율: {summary.lossRate}%</span>
+                                                    </div>
+                                                    {unitWeight > 0 && (
+                                                        <div className="flex gap-4 text-indigo-600 font-bold">
+                                                            <span>투입 중량: {inputWeight.toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3})}kg</span>
+                                                            <span>생산 중량: {prodWeight.toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3})}kg</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                             <table className="w-full border-collapse text-center text-xs">
                                                 <thead><tr className="bg-gray-100 text-gray-700 h-8 border-y border-gray-300 print:bg-gray-200"><th className="border-x border-gray-200 w-10">순번</th><th className="border-x border-gray-200 w-12">두께</th><th className="border-x border-gray-200 w-12">장변</th><th className="border-x border-gray-200 w-12">단변</th><th className="border-x border-gray-200 w-16">원본길이</th><th className="border-x border-gray-200 w-12">수량</th><th className="border-x border-gray-200 w-16 bg-white font-bold text-blue-600 border-2 border-blue-100 print:border">컷팅길이</th><th className="border-x border-gray-200 w-12">컷팅수</th><th className="border-x border-gray-200 w-12">수량</th><th className="border-x border-gray-200">마킹</th><th className="border-x border-gray-200 w-16">본당LOSS</th><th className="border-x border-gray-200 w-20">총LOSS</th></tr></thead>
@@ -369,9 +390,9 @@
                                                         const rowClass = 'bg-white';
                                                         
                                                         // --- Highlight Logic ---
-                                                        // 잔재가 270mm 이하이고 가장 긴 자재가 1000~2700 사이
+                                                        // 잔재가 270mm 이하이고, 잔재 + 가장 긴 자재의 합이 1000~2700 사이일 때
                                                         const maxPartLength = Math.max(...group.parts.map(p => p.length));
-                                                        const isHighlightCondition = group.remainder <= 270 && maxPartLength >= 1000 && maxPartLength <= 2700;
+                                                        const isHighlightCondition = group.remainder <= 270 && (group.remainder + maxPartLength) >= 1000 && (group.remainder + maxPartLength) <= 2700;
 
                                                         return group.parts.map((part, pIdx) => (
                                                             <tr key={`${gIdx}-${pIdx}`} className={`${rowClass} border-b border-gray-200 hover:bg-gray-50 transition print:bg-transparent`}>
