@@ -285,14 +285,14 @@
         };
 
         // --- Result View ---
-        const ResultView = ({ currentDong, dongs, setCurrentDong, addDong, deleteDong, renameDong, resultsByDong, runAllDongs, projectInfo, isNoDongMode }) => {
+        const ResultView = ({ currentDong, dongs, setCurrentDong, addDong, deleteDong, renameDong, resultsByDong, runAllDongs, projectInfo, isNoDongMode, dongData }) => {
             const [resultTab, setResultTab] = useState('min_rows');
             const allResults = resultsByDong && currentDong ? resultsByDong[currentDong] : null;
             const results = allResults ? allResults[resultTab] : null;
             const specKeys = results ? Object.keys(results).sort() : [];
             let overallSeq = 1;
 
-            // --- App 2를 위한 소스 코드 생성 (압축 적용) ---
+            // --- App 2를 위한 소스 코드 생성 (압축 적용 및 견적서 원본 추가) ---
             const handleGenerateSource = () => {
                 if (!resultsByDong || Object.keys(resultsByDong).length === 0) {
                     alert("생성할 계산 결과가 없습니다. 먼저 계산을 완료해주세요.");
@@ -303,7 +303,8 @@
                     timestamp: Date.now(),
                     projectInfo,
                     dongs,
-                    resultsByDong
+                    resultsByDong,
+                    dongData // App 2에서 수동 편집 및 재계산을 위해 견적서 원본 데이터 포함
                 };
                 
                 try {
@@ -671,7 +672,7 @@
                     <Sidebar viewMode={viewMode} setViewMode={setViewMode} projectInfo={projectInfo} setProjectInfo={setProjectInfo} isNoDongMode={isNoDongMode} setIsNoDongMode={setIsNoDongMode} />
                     <div className="flex-1 ml-64 p-8 print:m-0 print:p-0">
                         {viewMode === 'input' && (<InputView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} data={getCurrentData()} updateCurrentData={updateCurrentData} activeTab={activeTab} setActiveTab={setActiveTab} customStocks={customStocks} setCustomStocks={setCustomStocks} processGridData={processGridData} handlePaste={handlePaste} runAllDongs={runAllDongs} globalSettings={STANDARD_STOCKS} isUserStockMode={isUserStockMode} setIsUserStockMode={setIsUserStockMode} userStockList={userStockList} setUserStockList={setUserStockList} setViewMode={setViewMode} isCalculating={isCalculating} isNoDongMode={isNoDongMode} handleFetchStock={handleFetchStock} isGapiReady={isGapiReady} isLoggedIn={isLoggedIn} handleLogin={handleLogin} />)}
-                        {viewMode === 'result' && (<ResultView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} resultsByDong={resultsByDong} runAllDongs={runAllDongs} projectInfo={projectInfo} isNoDongMode={isNoDongMode} />)}
+                        {viewMode === 'result' && (<ResultView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} resultsByDong={resultsByDong} runAllDongs={runAllDongs} projectInfo={projectInfo} isNoDongMode={isNoDongMode} dongData={dongData} />)}
                     </div>
                 </div>
             );
