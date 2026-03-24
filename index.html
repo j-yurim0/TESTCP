@@ -88,10 +88,10 @@
         };
 
         const STANDARD_STOCKS = {
-            "default": [6000, 6600, 7200, 8000],
-            "100x100": { "2.1": [6000, 6600, 7200, 8000], "2.3": [6000, 6600, 7200, 8000], "3.0": [6000, 6200, 7200, 8000], "3.2": [6000, 6200, 7200, 8000] },
+            "default": [5000, 6000, 6600, 7200, 8000],
+            "100x100": { "2.1": [5000, 6000, 6600, 7200, 8000], "2.3": [5000, 6000, 6600, 7200, 8000], "3.0": [5000, 6000, 6200, 7200, 8000], "3.2": [5000, 6000, 6200, 7200, 8000] },
             "75x75": { "2.1": [6000, 6600, 7200, 8000], "2.3": [6000, 6600, 7200, 8000], "3.0": [6000, 6200, 7200, 8000], "3.2": [6000, 6200, 7200, 8000] },
-            "100x50": { "2.1": [6000, 6600, 7200, 8200], "2.3": [6000, 6600, 7200, 8200], "3.0": [6000, 6600, 7200, 8200], "3.2": [6000, 6600, 7200, 8200] },
+            "100x50": { "2.1": [5000, 6000, 6600, 7200, 8200], "2.3": [5000, 6000, 6600, 7200, 8200], "3.0": [5000, 6000, 6600, 7200, 8200], "3.2": [5000, 6000, 6600, 7200, 8200] },
             "50x50": { "2.1": [6000], "2.3": [6000], "3.0": [6000], "3.2": [6000] }
         };
 
@@ -189,11 +189,11 @@
                             <span className="flex items-center gap-2"><Building size={14} /> {dong}</span>
                         </button>
                         <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex gap-1 ${currentDong === dong ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition`}>
-                            <button onClick={(e) => { e.stopPropagation(); deleteDong(dong); }} className="p-0.5 text-gray-500 hover:text-red-500 rounded"><Trash2 size={10} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); deleteDong(dong); }} className="p-0.5 text-gray-400 hover:text-red-500 rounded"><Trash2 size={10} /></button>
                         </div>
                     </div>
                 ))}
-                <button onClick={addDong} className="px-3 py-2 text-gray-500 hover:text-blue-600 font-bold text-sm bg-gray-50 rounded hover:bg-blue-50 transition"><Plus size={16} /></button>
+                <button onClick={addDong} className="px-3 py-2 text-gray-400 hover:text-blue-600 font-bold text-sm bg-gray-50 rounded hover:bg-blue-50 transition"><Plus size={16} /></button>
             </div>
         );
 
@@ -261,28 +261,28 @@
                                         <input type="checkbox" className="w-4 h-4 text-blue-600" checked={isUserStockMode} onChange={e => setIsUserStockMode(e.target.checked)} />
                                         <span className="text-sm font-bold text-gray-800">제한된 자재로만 계산 (Inventory)</span>
                                     </label>
-                                    <p className="text-[10px] text-gray-500 mt-1 pl-6">체크 시, 아래 리스트에 있는 자재로만 CP를 짭니다.</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 pl-6">체크 시, 아래 리스트에 있는 자재로만 CP를 짭니다.</p>
                                 </div>
                                 {isUserStockMode ? (
                                     <div className="space-y-3">
                                         <div className="bg-blue-50 p-2 rounded border border-blue-100"><div className="text-xs font-bold text-blue-700 mb-1">표준 자재 추가</div><div className="flex gap-1 mb-1"><select className="flex-1 p-1 border rounded text-xs" value={`${newStd.w}*${newStd.h}|${newStd.t}`} onChange={e => { const val = e.target.value; if (!val) return; const [dim, t] = val.split('|'); const parts = dim.replace('x', '*').split('*'); setNewStd({ ...newStd, w: parts[0], h: parts[1], t: t, length: getStandardLengthsForInput(parts[0], parts[1], t)[0] }); }}>{getSpecOptions().map(opt => <option key={opt.value} value={opt.value.replace('x', '*')}>{opt.label}</option>)}</select><select className="w-20 p-1 border rounded text-xs" value={newStd.length} onChange={e => setNewStd({ ...newStd, length: +e.target.value })}>{getStandardLengthsForInput(newStd.w, newStd.h, newStd.t).map(l => <option key={l} value={l}>{l}</option>)}</select></div><div className="flex gap-1"><input type="number" className="flex-1 p-1 border rounded text-xs" placeholder="수량" value={newStd.qty} onChange={e => setNewStd({ ...newStd, qty: +e.target.value })} /><button onClick={() => handleAddUserStock('std')} className="px-2 bg-blue-600 text-white rounded text-xs font-bold">+</button></div></div>
                                         <div className="bg-gray-50 p-2 rounded border border-gray-200"><div className="text-xs font-bold text-gray-700 mb-1">잔재/기타 자재 추가</div><div className="flex gap-1 mb-1"><select className="w-full p-1 border rounded text-xs" value={`${newRem.w}*${newRem.h}|${newRem.t}`} onChange={e => { const val = e.target.value; if (!val) return; const [dim, t] = val.split('|'); const parts = dim.replace('x', '*').split('*'); setNewRem({ ...newRem, w: parts[0], h: parts[1], t: t }); }}>{getSpecOptions().map(opt => <option key={opt.value} value={opt.value.replace('x', '*')}>{opt.label}</option>)}</select></div><div className="flex gap-1"><input type="number" className="flex-1 p-1 border rounded text-xs" placeholder="길이" value={newRem.length || ''} onChange={e => setNewRem({ ...newRem, length: +e.target.value })} /><input type="number" className="w-12 p-1 border rounded text-xs" placeholder="수량" value={newRem.qty} onChange={e => setNewRem({ ...newRem, qty: +e.target.value })} /><button onClick={() => handleAddUserStock('rem')} className="px-2 bg-gray-600 text-white rounded text-xs font-bold">+</button></div></div>
-                                        <div className="max-h-40 overflow-y-auto border-t pt-2 space-y-1">{userStockList.length === 0 && <p className="text-xs text-gray-500 text-center">추가된 자재가 없습니다.</p>}{userStockList.map(item => (<div key={item.id} className="flex justify-between items-center text-xs bg-white p-1 rounded border"><span>{item.type === 'std' ? '🟦' : '⬜'} {item.w}*{item.h} {item.t}T - <b>{item.length}</b> ({item.qty}본)</span><button onClick={() => setUserStockList(userStockList.filter(x => x.id !== item.id))} className="text-red-500"><Trash2 size={12} /></button></div>))}</div>
+                                        <div className="max-h-40 overflow-y-auto border-t pt-2 space-y-1">{userStockList.length === 0 && <p className="text-xs text-gray-400 text-center">추가된 자재가 없습니다.</p>}{userStockList.map(item => (<div key={item.id} className="flex justify-between items-center text-xs bg-white p-1 rounded border"><span>{item.type === 'std' ? '🟦' : '⬜'} {item.w}*{item.h} {item.t}T - <b>{item.length}</b> ({item.qty}본)</span><button onClick={() => setUserStockList(userStockList.filter(x => x.id !== item.id))} className="text-red-500"><Trash2 size={12} /></button></div>))}</div>
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
                                         <div><label className="text-xs font-bold text-gray-500">기본 규격</label><div className="flex gap-2 mt-1"><select value={data.spec} onChange={e => updateCurrentData({ spec: e.target.value })} className="flex-1 p-1.5 border rounded text-sm bg-gray-50"><option>100*100</option><option>75*75</option><option>100*50</option><option>50*50</option></select><select value={data.thickness} onChange={e => updateCurrentData({ thickness: e.target.value })} className="w-20 p-1.5 border rounded text-sm bg-gray-50"><option>2.1</option><option>2.3</option><option>3.0</option><option>3.2</option></select></div></div>
-                                        <div className="pt-2 border-t"><div className="flex bg-gray-100 p-1 rounded-lg mb-2"><button onClick={() => setActiveTab('standard')} className={`flex-1 py-1 text-xs font-bold rounded ${activeTab === 'standard' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>표준</button><button onClick={() => setActiveTab('custom')} className={`flex-1 py-1 text-xs font-bold rounded ${activeTab === 'custom' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>잔재(공통)</button></div>{activeTab === 'custom' && (<div className="space-y-2">{customStocks.map((s, i) => (<div key={i} className="flex flex-col gap-1 p-2 bg-gray-50 rounded border"><div className="flex gap-1 mb-1"><select className="w-full p-1 border rounded text-xs bg-white" value={`${s.w}*${s.h}|${s.t}`} onChange={e => { const val = e.target.value; if (val && val.includes('|')) { const [dim, t] = val.split('|'); const parts = dim.replace('x', '*').split('*'); const n = [...customStocks]; n[i].w = parts[0]; n[i].h = parts[1]; n[i].t = t; setCustomStocks(n); } }}><option value="">규격 선택</option>{getSpecOptions().map(opt => <option key={opt.value} value={opt.value.replace('x', '*')}>{opt.label}</option>)}</select></div><div className="flex gap-1 items-center"><input type="number" className="flex-1 p-1 border rounded text-xs" value={s.length} onChange={e => { const n = [...customStocks]; n[i].length = +e.target.value; setCustomStocks(n) }} placeholder="Length" /><input type="number" className="w-10 p-1 border rounded text-xs" value={s.qty} onChange={e => { const n = [...customStocks]; n[i].qty = +e.target.value; setCustomStocks(n) }} placeholder="Qty" /><button onClick={() => setCustomStocks(customStocks.filter((_, idx) => idx !== i))} className="text-red-500"><Trash2 size={14} /></button></div></div>))}<button onClick={() => setCustomStocks([...customStocks, { w: '100', h: '100', t: '2.1', length: 0, qty: 1 }])} className="w-full py-1 text-xs border border-dashed rounded text-blue-500 font-bold hover:bg-blue-50">+ 추가</button></div>)}</div>
+                                        <div className="pt-2 border-t"><div className="flex bg-gray-100 p-1 rounded-lg mb-2"><button onClick={() => setActiveTab('standard')} className={`flex-1 py-1 text-xs font-bold rounded ${activeTab === 'standard' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>표준</button><button onClick={() => setActiveTab('custom')} className={`flex-1 py-1 text-xs font-bold rounded ${activeTab === 'custom' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>잔재(공통)</button></div>{activeTab === 'custom' && (<div className="space-y-2">{customStocks.map((s, i) => (<div key={i} className="flex flex-col gap-1 p-2 bg-gray-50 rounded border"><div className="flex gap-1 mb-1"><select className="w-full p-1 border rounded text-xs bg-white" value={`${s.w}*${s.h}|${s.t}`} onChange={e => { const val = e.target.value; if (val && val.includes('|')) { const [dim, t] = val.split('|'); const parts = dim.replace('x', '*').split('*'); const n = [...customStocks]; n[i].w = parts[0]; n[i].h = parts[1]; n[i].t = t; setCustomStocks(n); } }}><option value="">규격 선택</option>{getSpecOptions().map(opt => <option key={opt.value} value={opt.value.replace('x', '*')}>{opt.label}</option>)}</select></div><div className="flex gap-1 items-center"><input type="number" className="flex-1 p-1 border rounded text-xs" value={s.length} onChange={e => { const n = [...customStocks]; n[i].length = +e.target.value; setCustomStocks(n) }} placeholder="Length" /><input type="number" className="w-10 p-1 border rounded text-xs" value={s.qty} onChange={e => { const n = [...customStocks]; n[i].qty = +e.target.value; setCustomStocks(n) }} placeholder="Qty" /><button onClick={() => setCustomStocks(customStocks.filter((_, idx) => idx !== i))} className="text-red-400"><Trash2 size={14} /></button></div></div>))}<button onClick={() => setCustomStocks([...customStocks, { w: '100', h: '100', t: '2.1', length: 0, qty: 1 }])} className="w-full py-1 text-xs border border-dashed rounded text-blue-500 font-bold hover:bg-blue-50">+ 추가</button></div>)}</div>
                                     </div>
                                 )}
                             </div>
-                            <div className="p-3 bg-blue-50 rounded-lg text-xs text-blue-700">💡 <b>[작업 편의]</b> 모드는 잔재 100mm 이하(0 포함) 불가, 500mm 초과 기피, 마킹 뭉치기를 최우선으로 합니다. (App 1에서는 레이저 설비 적용으로 컷팅수/짧은부재 제한 해제됨)</div>
+                            <div className="p-3 bg-blue-50 rounded-lg text-xs text-blue-700">💡 <b>[작업 편의]</b> 모드는 잔재 100mm 이하(0 포함) 불가, 400mm 초과 기피, 마킹 뭉치기를 최우선으로 합니다. (App 1에서는 레이저 설비 적용으로 컷팅수/짧은부재 제한 해제됨)</div>
                         </div>
 
                         <div className="lg:col-span-3 bg-white p-0 rounded-xl shadow-sm border border-gray-200 flex flex-col h-[700px] overflow-hidden">
                             <div className="p-3 border-b bg-gray-50 flex justify-between items-center"><span className="text-sm font-bold text-gray-600">엑셀 붙여넣기 영역 (수정 가능)</span><button onClick={() => { updateCurrentData({ rawInput: '', gridData: [] }) }} className="text-xs text-red-500 hover:underline">초기화</button></div>
                             <div className="flex-1 overflow-auto custom-scrollbar relative bg-white">
-                                {data.gridData.length === 0 ? (<div className="absolute inset-0 flex items-center justify-center"><textarea className="absolute inset-0 opacity-0 cursor-text" onPaste={handlePaste} autoFocus /><div className="text-center text-gray-500 pointer-events-none"><p className="text-2xl font-bold mb-2">Ctrl + V</p><p className="text-sm">엑셀 표를 여기에 붙여넣으세요</p></div></div>) : (<table className="w-full text-xs border-collapse"><thead className="sticky top-0 bg-white shadow-sm z-10"><tr><th className="p-1 border bg-gray-100 w-8 text-center text-gray-500">#</th>{data.gridData[0]?.map((_, cIdx) => (<th key={cIdx} className="p-1 border min-w-[80px]"><select className={`w-full p-1 border rounded text-xs font-bold ${['length', 'qty'].includes(data.colMapping[cIdx]) ? 'bg-blue-100 text-blue-700' : ['width', 'height', 'thickness'].includes(data.colMapping[cIdx]) ? 'bg-green-100 text-green-700' : 'bg-white text-gray-500'}`} value={data.colMapping[cIdx] || ''} onChange={e => updateCurrentData({ colMapping: { ...data.colMapping, [cIdx]: e.target.value } })}><option value="">- 무시 -</option><option value="width">가로</option><option value="height">세로</option><option value="thickness">두께</option><option value="length">📏 길이</option><option value="qty">🔢 수량</option><option value="marking">🏷️ 마킹</option></select></th>))}</tr></thead><tbody className="bg-white">{data.gridData.map((row, rIdx) => (<tr key={rIdx} className="hover:bg-blue-50"><td className="p-1 border text-center text-gray-500 bg-gray-50">{rIdx + 1}</td>{row.map((cell, cIdx) => (<td key={cIdx} className="border p-0"><input className="w-full h-full p-1 text-xs border-none focus:ring-2 focus:ring-blue-500 outline-none" value={cell} onChange={(e) => handleCellChange(rIdx, cIdx, e.target.value)} /></td>))}</tr>))}</tbody></table>)}
+                                {data.gridData.length === 0 ? (<div className="absolute inset-0 flex items-center justify-center"><textarea className="absolute inset-0 opacity-0 cursor-text" onPaste={handlePaste} autoFocus /><div className="text-center text-gray-400 pointer-events-none"><p className="text-2xl font-bold mb-2">Ctrl + V</p><p className="text-sm">엑셀 표를 여기에 붙여넣으세요</p></div></div>) : (<table className="w-full text-xs border-collapse"><thead className="sticky top-0 bg-white shadow-sm z-10"><tr><th className="p-1 border bg-gray-100 w-8 text-center text-gray-500">#</th>{data.gridData[0]?.map((_, cIdx) => (<th key={cIdx} className="p-1 border min-w-[80px]"><select className={`w-full p-1 border rounded text-xs font-bold ${['length', 'qty'].includes(data.colMapping[cIdx]) ? 'bg-blue-100 text-blue-700' : ['width', 'height', 'thickness'].includes(data.colMapping[cIdx]) ? 'bg-green-100 text-green-700' : 'bg-white text-gray-400'}`} value={data.colMapping[cIdx] || ''} onChange={e => updateCurrentData({ colMapping: { ...data.colMapping, [cIdx]: e.target.value } })}><option value="">- 무시 -</option><option value="width">가로</option><option value="height">세로</option><option value="thickness">두께</option><option value="length">📏 길이</option><option value="qty">🔢 수량</option><option value="marking">🏷️ 마킹</option></select></th>))}</tr></thead><tbody className="bg-white">{data.gridData.map((row, rIdx) => (<tr key={rIdx} className="hover:bg-blue-50"><td className="p-1 border text-center text-gray-400 bg-gray-50">{rIdx + 1}</td>{row.map((cell, cIdx) => (<td key={cIdx} className="border p-0"><input className="w-full h-full p-1 text-xs border-none focus:ring-2 focus:ring-blue-500 outline-none" value={cell} onChange={(e) => handleCellChange(rIdx, cIdx, e.target.value)} /></td>))}</tr>))}</tbody></table>)}
                             </div>
                         </div>
                     </div>
@@ -344,7 +344,7 @@
                         </div>
                     </div>
                     {!isNoDongMode && <DongTabs dongs={dongs} currentDong={currentDong} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} />}
-                    {(!allResults || !results) ? (<div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300 text-gray-500"><p>계산된 결과가 없습니다. 데이터 입력 후 '현재 동 계산'을 눌러주세요.</p></div>) : (
+                    {(!allResults || !results) ? (<div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300 text-gray-400"><p>계산된 결과가 없습니다. 데이터 입력 후 '현재 동 계산'을 눌러주세요.</p></div>) : (
                         <div>
                             <div className="flex mb-4 border-b print:hidden gap-2">
                                 <button onClick={() => setResultTab('min_rows')} className={`px-6 py-3 font-bold text-sm ${resultTab === 'min_rows' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>① 작업 편의 (Work Convenience)</button>
@@ -383,16 +383,17 @@
                                                     )}
                                                 </div>
                                             </div>
-                                            <table className="w-full border-collapse text-center text-xs">
-                                                <thead><tr className="bg-gray-100 text-gray-700 h-8 border-y border-gray-300 print:bg-gray-200"><th className="border-x border-gray-200 w-10">순번</th><th className="border-x border-gray-200 w-12">두께</th><th className="border-x border-gray-200 w-12">장변</th><th className="border-x border-gray-200 w-12">단변</th><th className="border-x border-gray-200 w-16">원본길이</th><th className="border-x border-gray-200 w-12">수량</th><th className="border-x border-gray-200 w-16 bg-white font-bold text-blue-600 border-2 border-blue-100 print:border">컷팅길이</th><th className="border-x border-gray-200 w-12">컷팅수</th><th className="border-x border-gray-200 w-12">수량</th><th className="border-x border-gray-200">마킹</th><th className="border-x border-gray-200 w-16">본당LOSS</th><th className="border-x border-gray-200 w-20">총LOSS</th></tr></thead>
+                                            <table className="w-full table-fixed min-w-[1000px] border-collapse text-center text-xs">
+                                                <thead><tr className="bg-gray-100 text-gray-700 h-8 border-y border-gray-300 print:bg-gray-200"><th className="border-x border-gray-200 w-[4%]">순번</th><th className="border-x border-gray-200 w-[5%]">두께</th><th className="border-x border-gray-200 w-[5%]">장변</th><th className="border-x border-gray-200 w-[5%]">단변</th><th className="border-x border-gray-200 w-[7%]">원본길이</th><th className="border-x border-gray-200 w-[5%]">수량</th><th className="border-x border-gray-200 w-[8%] bg-white font-bold text-blue-600 border-2 border-blue-100 print:border">컷팅길이</th><th className="border-x border-gray-200 w-[5%]">컷팅수</th><th className="border-x border-gray-200 w-[5%]">수량</th><th className="border-x border-gray-200 w-[28%]">마킹</th><th className="border-x border-gray-200 w-[7%]">본당LOSS</th><th className="border-x border-gray-200 w-[8%]">총LOSS</th></tr></thead>
                                                 <tbody>
                                                     {plan.map((group, gIdx) => {
                                                         const rowClass = 'bg-white';
                                                         
                                                         // --- Highlight Logic ---
-                                                        // 잔재가 270mm 이하이고, 잔재 + 가장 긴 자재의 합이 1000~2700 사이일 때
-                                                        const maxPartLength = Math.max(...group.parts.map(p => p.length));
-                                                        const isHighlightCondition = group.remainder <= 270 && (group.remainder + maxPartLength) >= 1000 && (group.remainder + maxPartLength) <= 2700;
+                                                        const groupRemainderNum = parseFloat(group.remainder) || 0;
+                                                        const validCutLengths = group.parts.map(p => parseFloat(p.length)).filter(l => !isNaN(l) && l > 0);
+                                                        const maxPartLength = validCutLengths.length > 0 ? Math.max(...validCutLengths) : 0;
+                                                        const isHighlightCondition = groupRemainderNum <= 270 && (groupRemainderNum + maxPartLength) >= 1000 && (groupRemainderNum + maxPartLength) <= 2700;
 
                                                         return group.parts.map((part, pIdx) => (
                                                             <tr key={`${gIdx}-${pIdx}`} className={`${rowClass} border-b border-gray-200 hover:bg-gray-50 transition print:bg-transparent`}>
@@ -408,11 +409,11 @@
                                                                         <td rowSpan={group.parts.length} className="border-x border-gray-200">{Math.floor(group.qty)}</td>
                                                                     </>
                                                                 )}
-                                                                <td className="border-x border-gray-200 font-bold text-gray-800">{part.length}</td><td className="border-x border-gray-200">{(part.totalQty / group.qty)}</td><td className="border-x border-gray-200 font-bold">{Math.floor(part.totalQty)}</td><td className="border-x border-gray-200 text-left px-2 truncate max-w-[150px]">{part.marking}</td>
+                                                                <td className="border-x border-gray-200 font-bold text-gray-800">{part.length}</td><td className="border-x border-gray-200">{(part.totalQty / group.qty)}</td><td className="border-x border-gray-200 font-bold">{Math.floor(part.totalQty)}</td><td className="border-x border-gray-200 text-left px-2 truncate" title={part.marking}>{part.marking}</td>
                                                                 {pIdx === 0 && (
                                                                     <>
-                                                                        <td rowSpan={group.parts.length} className={`border-x border-gray-200 font-bold ${group.remainder >= 500 ? 'bg-[#FFCCBC] text-red-600' : ''}`}>{Number(group.remainder).toLocaleString()}</td>
-                                                                        <td rowSpan={group.parts.length} className="border-x border-gray-200 text-gray-500">{(Number(group.remainder) * Number(group.qty)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                                                                        <td rowSpan={group.parts.length} className={`border-x border-gray-200 font-bold ${groupRemainderNum >= 500 ? 'bg-[#FFCCBC] text-red-600' : ''}`}>{groupRemainderNum.toLocaleString()}</td>
+                                                                        <td rowSpan={group.parts.length} className="border-x border-gray-200 text-gray-500">{(groupRemainderNum * (parseFloat(group.qty) || 0)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                                                                     </>
                                                                 )}
                                                             </tr>
@@ -448,6 +449,15 @@
             const [customStocks, setCustomStocks] = useState([{ w: '100', h: '100', t: '2.1', length: 6000, qty: 10 }]);
             const [isUserStockMode, setIsUserStockMode] = useState(false);
             const [userStockList, setUserStockList] = useState([]);
+
+            // 동 개수에 따른 자동 단일 CP 모드 설정
+            useEffect(() => {
+                if (dongs.length === 1) {
+                    setIsNoDongMode(true);
+                } else if (dongs.length > 1) {
+                    setIsNoDongMode(false);
+                }
+            }, [dongs.length]);
             
             const getCurrentData = () => dongData[currentDong] || { rawInput: '', gridData: [], colMapping: {}, parsedItems: [], spec: '100*100', thickness: '2.1' };
             const updateCurrentData = (updates) => { setDongData(prev => ({ ...prev, [currentDong]: { ...prev[currentDong], ...updates } })); };
@@ -528,7 +538,12 @@
                 });
                 
                 let markings = Object.keys(inventory); 
-                if (randomize) { markings.sort(() => Math.random() - 0.5); }
+                if (randomize) { 
+                    markings.sort(() => Math.random() - 0.5); 
+                } else {
+                    markings.sort((a, b) => inventory[b].length - inventory[a].length);
+                }
+                
                 let finalPlan = []; let currentStockLimits = { ...stockLimits };
                 
                 while (markings.some(m => inventory[m].qty > 0)) {
@@ -536,6 +551,8 @@
                     for (let stockLen of availableStocks) {
                         if (currentStockLimits[stockLen] !== undefined && currentStockLimits[stockLen] <= 0) continue;
                         let currentPattern = { parts: [], remainder: stockLen, tempCounts: {}, stockLength: stockLen };
+                        
+                        // 핵심 조건: 무조건 잔재를 100 이상 남겨야 하므로, 100을 뺀 길이 이내의 부재만 후보로 선정
                         let candidateMarkings = markings.filter(m => inventory[m].qty > 0 && inventory[m].length <= currentPattern.remainder - 100);
                         if (candidateMarkings.length === 0) continue;
                         
@@ -546,7 +563,7 @@
                                 for (let mKey of candidateMarkings) {
                                     const item = inventory[mKey];
                                     let taken = currentPattern.tempCounts[mKey] || 0;
-                                    if (item.qty > taken && item.length <= currentPattern.remainder) {
+                                    if (item.qty > taken && item.length <= currentPattern.remainder - 100) {
                                         currentPattern.parts.push({ ...item, count: 1 }); 
                                         currentPattern.remainder -= item.length;
                                         currentPattern.tempCounts[mKey] = taken + 1;
@@ -564,11 +581,15 @@
                         } else {
                             for (let mKey of candidateMarkings) {
                                 const item = inventory[mKey]; if (item.qty <= 0) continue;
+                                // 100의 여유 공간을 뺀 상태에서 최대 탑재 수량 계산
                                 let maxPossibleInOneBar = Math.floor((currentPattern.remainder - 100) / item.length);
                                 if (maxPossibleInOneBar <= 0) continue;
-                                let countToTake = 1;
-                                if (item.qty <= maxPossibleInOneBar) countToTake = item.qty;
-                                else { for (let d = maxPossibleInOneBar; d >= 2; d--) { if (item.qty % d === 0) { countToTake = d; break; } } }
+                                
+                                let countToTake = Math.min(item.qty, maxPossibleInOneBar);
+                                if (mode === 'min_rows' && countToTake < item.qty) {
+                                     for (let d = countToTake; d >= 2; d--) { if (item.qty % d === 0) { countToTake = d; break; } }
+                                }
+                                
                                 if (countToTake > 0) {
                                     currentPattern.parts.push({ ...item, count: countToTake });
                                     currentPattern.remainder -= (item.length * countToTake);
@@ -577,6 +598,7 @@
                             }
                         }
                         
+                        // 만약 어떻게 조합하다보니 100 미만으로 남게 되었다면 즉시 폐기
                         if (currentPattern.remainder < 100) continue;
                         
                         let score = 0;
@@ -584,6 +606,7 @@
                             if (currentPattern.remainder >= 100 && currentPattern.remainder <= 500) { score += 20000000; }
                             else if (currentPattern.remainder > 500) { score -= (currentPattern.remainder * 50); score -= 5000000; }
                             else score -= 999999999;
+                            
                             let maxRepeats = Infinity;
                             currentPattern.parts.forEach(p => {
                                 let available = inventory[p.id].qty;
@@ -596,11 +619,13 @@
                                 if (inventory[p.id].qty === p.count * maxRepeats) itemsCleared++;
                             });
                             score += (itemsCleared * 500000);
-                            
-                            // App 1 변경점: 짧은 부재 제한 삭제, 컷팅 횟수 제한 삭제
-                            
                             score -= (stockLen * 10);
-                        } else score -= currentPattern.remainder;
+                        } else {
+                            // LOSS 최소화 모드 스코어링 로직
+                            score -= currentPattern.remainder;
+                            score += (currentPattern.parts.reduce((a, b) => a + b.count, 0) * 0.1); 
+                        }
+                        
                         if (score > bestScore) { bestScore = score; bestPattern = currentPattern; }
                     }
                     
@@ -619,30 +644,40 @@
                             finalPlan.push({ stockLength: bestPattern.stockLength, parts: finalParts, remainder: bestPattern.remainder, qty: repeatQty });
                         } else break;
                     } else {
-                        markings.forEach(m => {
+                        let packedSomething = false;
+                        for (let m of markings) {
                             if (inventory[m].qty > 0) {
                                 let item = inventory[m]; 
+                                // 만약 100mm의 여유분을 물리적으로 남길 수 있는 원본이 있다면 그걸 선택, 아니면 제일 긴 거 선택
                                 let selectedStock = availableStocks.find(s => s >= item.length + 100); 
                                 if (!selectedStock) selectedStock = Math.max(...availableStocks);
                                 finalPlan.push({ stockLength: selectedStock, parts: [{ ...item, count: 1, totalQty: item.qty }], remainder: selectedStock - item.length, qty: item.qty });
                                 item.qty = 0;
+                                packedSomething = true;
                             }
-                        });
+                        }
+                        if (!packedSomething) break;
                     }
                 }
                 return finalPlan;
             };
 
             const calculatePlanScore = (plan, mode) => {
-                if (mode === 'min_loss') return -(plan.reduce((acc, p) => acc + (p.remainder * p.qty), 0));
+                if (mode === 'min_loss') {
+                    let score = -(plan.reduce((acc, p) => acc + (p.remainder * p.qty), 0));
+                    // 100mm 미만의 잔재가 하나라도 포함된 플랜은 즉시 폐기 (-10억점)
+                    let badCount = plan.filter(p => p.remainder < 100).reduce((acc, p) => acc + p.qty, 0);
+                    score -= (badCount * 1000000000); 
+                    return score;
+                }
                 let score = 0; score -= (plan.length * 10000000);
                 let markingInSequences = {};
                 plan.forEach((pattern, idx) => { pattern.parts.forEach(p => { if (!markingInSequences[p.marking]) markingInSequences[p.marking] = new Set(); markingInSequences[p.marking].add(idx); }); });
                 Object.keys(markingInSequences).forEach(m => { if (markingInSequences[m].size > 1) score -= (markingInSequences[m].size * 2000000); });
                 plan.forEach(pattern => {
                     if (pattern.remainder < 100) score -= 1000000000;
-                    if (pattern.remainder >= 100 && pattern.remainder <= 500) score += 500000; else if (pattern.remainder > 500) score -= (pattern.remainder * 10);
-                    // App 1 변경점: 짧은 부재 페널티 삭제됨
+                    if (pattern.remainder >= 100 && pattern.remainder <= 500) score += 500000; 
+                    else if (pattern.remainder > 500) score -= (pattern.remainder * 10);
                 });
                 return score;
             };
@@ -660,7 +695,10 @@
                         stds.forEach(l => { if (!availableStocks.includes(l)) availableStocks.push(l); }); availableStocks.sort((a, b) => a - b);
                     }
                     if (availableStocks.length === 0) availableStocks = [6000];
-                    const SIMULATION_RUNS = mode === 'min_rows' ? 2000 : 500; const validPlans = [];
+                    
+                    // LOSS 최소화 모드의 시뮬레이션 횟수를 8000번으로 대폭 상향
+                    const SIMULATION_RUNS = mode === 'min_rows' ? 2000 : 8000; 
+                    const validPlans = [];
                     for (let i = 0; i < SIMULATION_RUNS; i++) {
                         const plan = solvePatternBased(groupItems, availableStocks, mode, 'mixed', true, stockLimits);
                         if (plan.length > 0) { const score = calculatePlanScore(plan, mode); validPlans.push({ plan, score }); }
