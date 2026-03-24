@@ -204,13 +204,12 @@
             processGridData, handlePaste, runAllDongs, globalSettings,
             isUserStockMode, setIsUserStockMode, userStockList, setUserStockList,
             setViewMode, isCalculating, isNoDongMode,
-            handleFetchStock, isGapiReady, isLoggedIn, handleLogin
+            handleFetchStock, isGapiReady, isLoggedIn, handleLogin,
+            inputMode, handleInputModeChange
         }) => {
-            const [inputMode, setInputMode] = useState('sales');
             const [newStd, setNewStd] = useState({ w: '100', h: '100', t: '2.1', length: 6000, qty: 10 });
             const [newRem, setNewRem] = useState({ w: '100', h: '100', t: '2.1', length: 0, qty: 1 });
 
-            useEffect(() => { if (inputMode === 'sales') { updateCurrentData({ colMapping: { 1: 'width', 2: 'height', 3: 'thickness', 4: 'length', 8: 'qty', 13: 'marking' } }); } else { updateCurrentData({ colMapping: { 2: 'width', 3: 'height', 4: 'thickness', 5: 'length', 7: 'qty', 8: 'marking' } }); } }, [inputMode]);
             const getSpecOptions = () => { const options = []; Object.keys(globalSettings).forEach(key => { if (Array.isArray(globalSettings[key])) { if (key !== "default") options.push({ label: key, value: key + "|2.1" }); } else { Object.keys(globalSettings[key]).forEach(subKey => { options.push({ label: `${key} ${subKey}T`, value: `${key}|${subKey}` }); }); } }); return options; };
             const getStandardLengthsForInput = (w, h, t) => { const dims = [parseInt(w), parseInt(h)].sort((a, b) => b - a); const specKey = `${dims[0]}x${dims[1]}`; const thickStr = String(t).trim(); const settings = globalSettings; if (settings[specKey]) { if (settings[specKey][thickStr]) return settings[specKey][thickStr]; if (thickStr === '2.3' && settings[specKey]['2.1']) return settings[specKey]['2.1']; if (settings[specKey]['all']) return settings[specKey]['all']; } return settings["default"] || []; };
             const handleCellChange = (rIdx, cIdx, val) => { const newData = [...data.gridData]; newData[rIdx][cIdx] = val; updateCurrentData({ gridData: newData }); };
@@ -233,8 +232,8 @@
                             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                                 <h3 className="font-bold text-gray-700 mb-3 flex items-center gap-2 text-sm"><Settings size={16} /> 입력 양식 선택</h3>
                                 <div className="flex bg-gray-100 p-1 rounded-lg">
-                                    <button onClick={() => setInputMode('sales')} className={`flex-1 py-2 text-xs font-bold rounded ${inputMode === 'sales' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>영업 (기본)</button>
-                                    <button onClick={() => setInputMode('design')} className={`flex-1 py-2 text-xs font-bold rounded ${inputMode === 'design' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>설계 (상세)</button>
+                                    <button onClick={() => handleInputModeChange('sales')} className={`flex-1 py-2 text-xs font-bold rounded ${inputMode === 'sales' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>영업 (기본)</button>
+                                    <button onClick={() => handleInputModeChange('design')} className={`flex-1 py-2 text-xs font-bold rounded ${inputMode === 'design' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>설계 (상세)</button>
                                 </div>
                             </div>
 
@@ -383,13 +382,29 @@
                                                     )}
                                                 </div>
                                             </div>
-                                            <table className="w-full table-fixed min-w-[1000px] border-collapse text-center text-xs">
-                                                <thead><tr className="bg-gray-100 text-gray-700 h-8 border-y border-gray-300 print:bg-gray-200"><th className="border-x border-gray-200 w-[4%]">순번</th><th className="border-x border-gray-200 w-[5%]">두께</th><th className="border-x border-gray-200 w-[5%]">장변</th><th className="border-x border-gray-200 w-[5%]">단변</th><th className="border-x border-gray-200 w-[7%]">원본길이</th><th className="border-x border-gray-200 w-[5%]">수량</th><th className="border-x border-gray-200 w-[8%] bg-white font-bold text-blue-600 border-2 border-blue-100 print:border">컷팅길이</th><th className="border-x border-gray-200 w-[5%]">컷팅수</th><th className="border-x border-gray-200 w-[5%]">수량</th><th className="border-x border-gray-200 w-[28%]">마킹</th><th className="border-x border-gray-200 w-[7%]">본당LOSS</th><th className="border-x border-gray-200 w-[8%]">총LOSS</th></tr></thead>
+                                            <table className="table-fixed w-[1000px] border-collapse text-center text-xs">
+                                                <thead>
+                                                    <tr className="bg-gray-100 text-gray-700 h-8 border-y border-gray-300 print:bg-gray-200">
+                                                        <th className="border-x border-gray-200 w-[50px]">순번</th>
+                                                        <th className="border-x border-gray-200 w-[50px]">두께</th>
+                                                        <th className="border-x border-gray-200 w-[50px]">장변</th>
+                                                        <th className="border-x border-gray-200 w-[50px]">단변</th>
+                                                        <th className="border-x border-gray-200 w-[80px]">원본길이</th>
+                                                        <th className="border-x border-gray-200 w-[50px]">수량</th>
+                                                        <th className="border-x border-gray-200 w-[100px] bg-white font-bold text-blue-600 border-2 border-blue-100 print:border">컷팅길이</th>
+                                                        <th className="border-x border-gray-200 w-[60px]">컷팅수</th>
+                                                        <th className="border-x border-gray-200 w-[60px]">수량</th>
+                                                        <th className="border-x border-gray-200 w-[260px]">마킹</th>
+                                                        <th className="border-x border-gray-200 w-[90px]">본당LOSS</th>
+                                                        <th className="border-x border-gray-200 w-[100px]">총LOSS</th>
+                                                    </tr>
+                                                </thead>
                                                 <tbody>
                                                     {plan.map((group, gIdx) => {
                                                         const rowClass = 'bg-white';
                                                         
                                                         // --- Highlight Logic ---
+                                                        // 잔재가 270mm 이하이고, 잔재 + 가장 긴 자재의 합이 1000~2700 사이일 때
                                                         const groupRemainderNum = parseFloat(group.remainder) || 0;
                                                         const validCutLengths = group.parts.map(p => parseFloat(p.length)).filter(l => !isNaN(l) && l > 0);
                                                         const maxPartLength = validCutLengths.length > 0 ? Math.max(...validCutLengths) : 0;
@@ -409,11 +424,14 @@
                                                                         <td rowSpan={group.parts.length} className="border-x border-gray-200">{Math.floor(group.qty)}</td>
                                                                     </>
                                                                 )}
-                                                                <td className="border-x border-gray-200 font-bold text-gray-800">{part.length}</td><td className="border-x border-gray-200">{(part.totalQty / group.qty)}</td><td className="border-x border-gray-200 font-bold">{Math.floor(part.totalQty)}</td><td className="border-x border-gray-200 text-left px-2 truncate" title={part.marking}>{part.marking}</td>
+                                                                <td className="border-x border-gray-200 font-bold text-gray-800">{part.length}</td>
+                                                                <td className="border-x border-gray-200">{(part.totalQty / group.qty)}</td>
+                                                                <td className="border-x border-gray-200 font-bold">{Math.floor(part.totalQty)}</td>
+                                                                <td className="border-x border-gray-200 text-left px-2 truncate" title={part.marking}>{part.marking}</td>
                                                                 {pIdx === 0 && (
                                                                     <>
-                                                                        <td rowSpan={group.parts.length} className={`border-x border-gray-200 font-bold ${groupRemainderNum >= 500 ? 'bg-[#FFCCBC] text-red-600' : ''}`}>{groupRemainderNum.toLocaleString()}</td>
-                                                                        <td rowSpan={group.parts.length} className="border-x border-gray-200 text-gray-500">{(groupRemainderNum * (parseFloat(group.qty) || 0)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                                                                        <td rowSpan={group.parts.length} className={`border-x border-gray-200 font-bold ${group.remainder >= 400 ? 'bg-[#FFCCBC] text-red-600' : ''}`}>{Number(group.remainder).toLocaleString()}</td>
+                                                                        <td rowSpan={group.parts.length} className="border-x border-gray-200 text-gray-500">{(Number(group.remainder) * Number(group.qty)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                                                                     </>
                                                                 )}
                                                             </tr>
@@ -435,6 +453,7 @@
         function App() {
             const [user, setUser] = useState(null);
             const [viewMode, setViewMode] = useState('input');
+            const [inputMode, setInputMode] = useState('sales'); // Moved state up here
             const [isFirebaseReady, setIsFirebaseReady] = useState(false);
             const [isCalculating, setIsCalculating] = useState(false);
             const [projectInfo, setProjectInfo] = useState({ company: '', site: '', note: '', isIronBanding: false, isUnder1Ton: false });
@@ -464,11 +483,54 @@
             const getStockLengths = (w, h, t) => { const dims = [parseInt(w), parseInt(h)].sort((a, b) => b - a); const specKey = `${dims[0]}x${dims[1]}`; const thickStr = String(t).trim(); const settings = globalSettings; if (settings[specKey]) { if (settings[specKey][thickStr]) return settings[specKey][thickStr]; if (thickStr === '2.3' && settings[specKey]['2.1']) return settings[specKey]['2.1']; if (settings[specKey]['all']) return settings[specKey]['all']; } return settings["default"] || []; };
             const initFirebase = async () => { if (!window.FirebaseSDK) return; try { const { initializeApp, getAuth } = window.FirebaseSDK; } catch (e) { console.warn(e); } };
             useEffect(() => { if (window.FirebaseSDK) initFirebase(); else window.addEventListener('firebase-sdk-ready', initFirebase); return () => window.removeEventListener('firebase-sdk-ready', initFirebase); }, []);
+
+            // 입력 양식 전역 변경 핸들러
+            const handleInputModeChange = (mode) => {
+                setInputMode(mode);
+                const newMapping = mode === 'sales' 
+                    ? { 1: 'width', 2: 'height', 3: 'thickness', 4: 'length', 8: 'qty', 13: 'marking' }
+                    : { 2: 'width', 3: 'height', 4: 'thickness', 5: 'length', 7: 'qty', 8: 'marking' };
+                
+                // 모든 동의 컬럼 매핑을 일괄 업데이트
+                setDongData(prev => {
+                    const nextData = { ...prev };
+                    Object.keys(nextData).forEach(dName => {
+                        nextData[dName] = { ...nextData[dName], colMapping: newMapping };
+                    });
+                    return nextData;
+                });
+            };
             
-            const addDong = () => { const newDongName = prompt("새 동 이름을 입력하세요:"); if (newDongName && !dongs.includes(newDongName)) { setDongs([...dongs, newDongName]); setDongData(prev => ({ ...prev, [newDongName]: { rawInput: '', gridData: [], colMapping: { 1: 'width', 2: 'height', 3: 'thickness', 4: 'length', 8: 'qty', 13: 'marking' }, parsedItems: [], spec: '100*100', thickness: '2.1' } })); setCurrentDong(newDongName); } };
+            const addDong = () => { 
+                const newDongName = prompt("새 동 이름을 입력하세요:"); 
+                if (newDongName && !dongs.includes(newDongName)) { 
+                    setDongs([...dongs, newDongName]); 
+                    const newMapping = inputMode === 'sales' 
+                        ? { 1: 'width', 2: 'height', 3: 'thickness', 4: 'length', 8: 'qty', 13: 'marking' }
+                        : { 2: 'width', 3: 'height', 4: 'thickness', 5: 'length', 7: 'qty', 8: 'marking' };
+                    setDongData(prev => ({ 
+                        ...prev, 
+                        [newDongName]: { rawInput: '', gridData: [], colMapping: newMapping, parsedItems: [], spec: '100*100', thickness: '2.1' } 
+                    })); 
+                    setCurrentDong(newDongName); 
+                } 
+            };
+            
             const renameDong = (oldName) => { const newName = prompt(`'${oldName}'의 새 이름을 입력하세요:`, oldName); if (newName && newName !== oldName && !dongs.includes(newName)) { setDongs(prev => prev.map(d => d === oldName ? newName : d)); if (currentDong === oldName) setCurrentDong(newName); setDongData(prev => { const n = { ...prev }; n[newName] = n[oldName]; delete n[oldName]; return n; }); setResultsByDong(prev => { const n = { ...prev }; if (n[oldName]) { n[newName] = n[oldName]; delete n[oldName]; } return n; }); } };
             const deleteDong = (targetDong) => { if (dongs.length <= 1) { alert("최소 하나의 동은 있어야 합니다."); return; } if (confirm(`'${targetDong}'을 삭제하시겠습니까?`)) { const newDongs = dongs.filter(d => d !== targetDong); setDongs(newDongs); if (currentDong === targetDong) setCurrentDong(newDongs[0]); setDongData(prev => { const n = { ...prev }; delete n[targetDong]; return n; }); setResultsByDong(prev => { const n = { ...prev }; delete n[targetDong]; return n; }); } };
-            const handlePaste = (e) => { e.preventDefault(); const text = e.clipboardData.getData('text'); const rows = text.trim().split('\n').map(row => row.split('\t')); updateCurrentData({ rawInput: text, gridData: rows }); };
+            const handlePaste = (e) => { 
+                e.preventDefault(); 
+                const text = e.clipboardData.getData('text'); 
+                const rows = text.trim().split('\n').map(row => row.split('\t')); 
+                
+                // 기존 매핑이 있다면 유지, 없으면 현재 inputMode 기준 매핑 적용
+                const currentMapping = dongData[currentDong]?.colMapping;
+                const newMapping = (currentMapping && Object.keys(currentMapping).length > 0) 
+                    ? currentMapping 
+                    : (inputMode === 'sales' ? { 1: 'width', 2: 'height', 3: 'thickness', 4: 'length', 8: 'qty', 13: 'marking' } : { 2: 'width', 3: 'height', 4: 'thickness', 5: 'length', 7: 'qty', 8: 'marking' });
+                
+                updateCurrentData({ rawInput: text, gridData: rows, colMapping: newMapping }); 
+            };
 
             // --- Google Sheets Logic (Read-Only) ---
             const [tokenClient, setTokenClient] = useState(null);
@@ -716,6 +778,19 @@
                             return a.plan.reduce((acc, p) => acc + (p.remainder * p.qty), 0) - b.plan.reduce((acc, p) => acc + (p.remainder * p.qty), 0);
                         });
                         const bestPlan = validPlans[0].plan;
+
+                        // 동기화/정렬 로직 추가: 원본 길이 내림차순 -> 마킹 기준 오름차순 (자연정렬)
+                        bestPlan.sort((a, b) => {
+                            const lenDiff = (parseFloat(b.stockLength) || 0) - (parseFloat(a.stockLength) || 0);
+                            if (lenDiff !== 0) return lenDiff;
+                            
+                            // 내부 컷팅 파트들을 길이순으로 정렬한 뒤 마킹 문자열 결합하여 비교 (C1, C2, C10 등 자연스러운 숫자 정렬 포함)
+                            const aMark = [...a.parts].sort((x, y) => parseFloat(x.length) - parseFloat(y.length)).map(x => x.marking || '').join(',');
+                            const bMark = [...b.parts].sort((x, y) => parseFloat(x.length) - parseFloat(y.length)).map(x => x.marking || '').join(',');
+                            
+                            return aMark.localeCompare(bMark, undefined, { numeric: true, sensitivity: 'base' });
+                        });
+
                         const totalBars = bestPlan.reduce((acc, p) => acc + p.qty, 0); const totalStockLen = bestPlan.reduce((acc, p) => acc + (p.stockLength * p.qty), 0); const totalLoss = bestPlan.reduce((acc, p) => acc + (p.remainder * p.qty), 0); const lossRate = totalStockLen ? ((totalLoss / totalStockLen) * 100).toFixed(2) : 0;
                         computedResults[specKey] = { plan: bestPlan, summary: { totalBars, lossRate, totalLoss } };
                     }
@@ -730,7 +805,7 @@
                 <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex">
                     <Sidebar viewMode={viewMode} setViewMode={setViewMode} projectInfo={projectInfo} setProjectInfo={setProjectInfo} isNoDongMode={isNoDongMode} setIsNoDongMode={setIsNoDongMode} />
                     <div className="flex-1 ml-64 p-8 print:m-0 print:p-0">
-                        {viewMode === 'input' && (<InputView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} data={getCurrentData()} updateCurrentData={updateCurrentData} activeTab={activeTab} setActiveTab={setActiveTab} customStocks={customStocks} setCustomStocks={setCustomStocks} processGridData={processGridData} handlePaste={handlePaste} runAllDongs={runAllDongs} globalSettings={STANDARD_STOCKS} isUserStockMode={isUserStockMode} setIsUserStockMode={setIsUserStockMode} userStockList={userStockList} setUserStockList={setUserStockList} setViewMode={setViewMode} isCalculating={isCalculating} isNoDongMode={isNoDongMode} handleFetchStock={handleFetchStock} isGapiReady={isGapiReady} isLoggedIn={isLoggedIn} handleLogin={handleLogin} />)}
+                        {viewMode === 'input' && (<InputView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} data={getCurrentData()} updateCurrentData={updateCurrentData} activeTab={activeTab} setActiveTab={setActiveTab} customStocks={customStocks} setCustomStocks={setCustomStocks} processGridData={processGridData} handlePaste={handlePaste} runAllDongs={runAllDongs} globalSettings={STANDARD_STOCKS} isUserStockMode={isUserStockMode} setIsUserStockMode={setIsUserStockMode} userStockList={userStockList} setUserStockList={setUserStockList} setViewMode={setViewMode} isCalculating={isCalculating} isNoDongMode={isNoDongMode} handleFetchStock={handleFetchStock} isGapiReady={isGapiReady} isLoggedIn={isLoggedIn} handleLogin={handleLogin} inputMode={inputMode} handleInputModeChange={handleInputModeChange} />)}
                         {viewMode === 'result' && (<ResultView currentDong={currentDong} dongs={dongs} setCurrentDong={setCurrentDong} addDong={addDong} deleteDong={deleteDong} renameDong={renameDong} resultsByDong={resultsByDong} runAllDongs={runAllDongs} projectInfo={projectInfo} isNoDongMode={isNoDongMode} dongData={dongData} />)}
                     </div>
                 </div>
