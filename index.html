@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스마트 CP 플래너 (App 1) - 설계/영업용</title>
 
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -15,7 +17,6 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 
-    <!-- LZ-String 압축 라이브러리 추가 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 
     <style>
@@ -163,8 +164,10 @@
                     <div className="p-4 space-y-4 flex-1 overflow-y-auto">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-500">프로젝트 정보</label>
-                            <input className="w-full p-2 border rounded text-sm bg-gray-50 focus:bg-white transition" placeholder="업체명" value={projectInfo.company} onChange={e => handleTextChange(e, 'company')} />
-                            <input className="w-full p-2 border rounded text-sm bg-gray-50 focus:bg-white transition" placeholder="현장명" value={projectInfo.site} onChange={e => handleTextChange(e, 'site')} />
+                            
+                            {/* 수정된 부분: 업체명(현장명) 단일 입력란 */}
+                            <input className="w-full p-2 border rounded text-sm bg-gray-50 focus:bg-white transition" placeholder="업체명(현장명)" value={projectInfo.company} onChange={e => handleTextChange(e, 'company')} />
+                            
                             <input className="w-full p-2 border rounded text-sm bg-gray-50 focus:bg-white transition" placeholder="기타사항 (메모)" value={projectInfo.note} onChange={e => handleTextChange(e, 'note')} />
                             <div className="flex flex-col gap-1 mt-2">
                                 <label className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" checked={projectInfo.isIronBanding} onChange={e => handleCheckChange(e, 'isIronBanding')} /> 철밴딩 동표기</label>
