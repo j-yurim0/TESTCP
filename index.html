@@ -413,7 +413,7 @@
                                                         
                                                         const isRedTarget = (w == '100' || h == '100');
                                                         const isRedLoss = isRedTarget && groupRemainderNum >= 500 && groupRemainderNum <= 1000;
-                                                        const isHighlightCondition = groupRemainderNum <= 310 && (groupRemainderNum + maxPartLength) >= 1000 && (groupRemainderNum + maxPartLength) <= 2800;
+                                                        const isHighlightCondition = groupRemainderNum <= 310 && (groupRemainderNum + maxPartLength) >= 1000 && (groupRemainderNum + maxPartLength) <= 2900;
 
                                                         return group.parts.map((part, pIdx) => (
                                                             <tr key={`${gIdx}-${pIdx}`} className={`${rowClass} border-b border-gray-200 hover:bg-gray-50 transition print:bg-transparent`}>
